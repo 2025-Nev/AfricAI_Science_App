@@ -1,30 +1,24 @@
-import random
-import json
 from fastapi import FastAPI
+from questions import get_questions
+from quiz import Quiz
 
 app = FastAPI()
 
-def load_questions():
-  """Loads the questions from the questions.json file."""
-  with open("questions.json", "r") as f:
-    questions = json.load(f)
-  return questions
-
 @app.get("/")
-def get_questions():
-  """Gets the list of questions."""
-  questions = load_questions()
-  return {"questions": questions}
+def index() -> str:
+    return "AfricAI Quiz!"
 
-@app.post("/answer")
-def answer_question(question_id: int, answer: str):
-  """Answers a question."""
-  questions = load_questions()
-  question = questions[question_id]
-  if answer.lower() == question["correct_answer"].lower():
-    return {"correct": True}
-  else:
-    return {"correct": False}
+@app.get("/get_question")
+def get_question() -> dict:
+    questions = get_questions()
+    current_question = questions[0]
+    return {"question_text": current_question.question_text, "answer_choices": current_question.answer_choices}
+
+@app.post("/answer_question")
+def answer_question(answer: str) -> bool:
+    questions = get_questions()
+    current_question = questions[0]
+    return quiz.answer_question(answer)
 
 if __name__ == "__main__":
-  app.run(debug=True)
+    uvicorn.run(app, host="0.0.0.0", port=8000)
